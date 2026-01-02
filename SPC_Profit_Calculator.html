@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Junk Removal Profit Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 15px; }
+    h2 { text-align: center; margin-bottom: 15px; font-size: 22px; }
+
+    /* Floating labels wrapper */
+    .input-group {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 14px 10px 14px 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    .input-group label {
+      position: absolute;
+      top: 14px;
+      left: 12px;
+      color: #666;
+      font-size: 16px;
+      pointer-events: none;
+      transition: 0.2s ease all;
+      background: #f5f5f5;
+      padding: 0 4px;
+    }
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label,
+    .input-group select:focus + label,
+    .input-group select:not([value=""]) + label {
+      top: -8px;
+      left: 8px;
+      font-size: 12px;
+      color: #007BFF;
+    }
+
+    button { width: 100%; padding: 14px; font-size: 18px; background: #007BFF; color: white; border: none; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #0056b3; }
+
+    .result { margin-top: 15px; border-radius:10px; font-size:16px; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+
+    .margin-bar-container { width: 100%; background: #ccc; border-radius: 10px; height: 28px; margin-top: 15px; overflow: hidden; }
+    .margin-bar { height: 100%; width: 0; text-align: center; color: #fff; line-height: 28px; font-weight: bold; transition: width 0.8s ease, background 0.5s ease; border-radius: 10px 0 0 10px; }
+
+    .suggestion { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 14px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .low-margin { background-color: #ffe5b4; color: #a85c00; border: 1px solid #ffbf00; }
+
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; background: #fff; border-radius: 10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+    .col-left { background:#f8d7da; padding:10px; border-radius:8px; }
+    .col-right { background:#d4edda; padding:10px; border-radius:8px; }
+
+    @media(max-width:600px) {
+      .result-grid { grid-template-columns: 1fr; }
+      .input-group input, .input-group select, button { font-size: 18px; padding: 16px; }
+      .margin-bar-container { height: 32px; }
+      .margin-bar { line-height: 32px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Junk Removal Profit Calculator</h2>
+
+<div class="input-group">
+  <input type="number" id="price" placeholder=" " required>
+  <label for="price">Price per Load ($)</label>
+</div>
+
+<div class="input-group">
+  <select id="category" onchange="checkSpecialJob()" required>
+    <option value="" disabled selected></option>
+    <option>Estate Clean Outs</option>
+    <option>Commercial Junk Removal</option>
+    <option>Furniture Removal</option>
+    <option>Construction Debris Removal</option>
+    <option>Pool & Hot Tub Removal</option>
+    <option>Residential Junk Removal</option>
+    <option>Shed Removal</option>
+    <option>Storage Unit Clean Outs</option>
+    <option>Appliance Removal</option>
+    <option>Garage Clean Outs</option>
+    <option>Yard Waste Removal</option>
+    <option>Deck Demolition</option>
+  </select>
+  <label for="category">Job Category</label>
+</div>
+
+<div id="specialJobSection" style="display:none;">
+  <div class="input-group">
+    <input type="number" id="demoLabor" placeholder=" " value="100">
+    <label for="demoLabor">Extra Demo Labor ($)</label>
+  </div>
+  <div class="suggestion">Tip: Remember to account for demo time when pricing this job.</div>
+</div>
+
+<div class="input-group">
+  <input type="number" id="stairsFee" placeholder=" ">
+  <label for="stairsFee">Stairs Fee ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="heavyFee" placeholder=" ">
+  <label for="heavyFee">Heavy Items Fee ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="otherFee" placeholder=" ">
+  <label for="otherFee">Other Fee ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="loads" placeholder=" " value="1">
+  <label for="loads">Number of Loads</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="employees" placeholder=" ">
+  <label for="employees">Number of Employees</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="hourlyRate" placeholder=" ">
+  <label for="hourlyRate">Hourly Rate ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="hours" placeholder=" ">
+  <label for="hours">Hours Worked</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="fuel" placeholder=" ">
+  <label for="fuel">Fuel Cost per Load ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="dump" placeholder=" ">
+  <label for="dump">Dump Fee per Load ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="lead" placeholder=" ">
+  <label for="lead">Lead/Ad Cost ($)</label>
+</div>
+
+<div class="input-group">
+  <input type="number" id="discount" placeholder=" ">
+  <label for="discount">Customer Discount ($)</label>
+</div>
+
+<button onclick="calculate()">Calculate Profit & Margin</button>
+
+<div class="margin-bar-container">
+  <div class="margin-bar" id="marginBar">0%</div>
+</div>
+
+<div id="lowMarginSuggestion" class="suggestion low-margin" style="display:none;">
+  Profit margin is low. Consider increasing job price, reducing labor hours, or lowering dump/fuel costs.
+</div>
+
+<div id="output"></div>
+
+<script>
+function checkSpecialJob() {
+  const specialCategories = ["Shed Removal","Pool & Hot Tub Removal","Deck Demolition"];
+  const category = document.getElementById("category").value;
+  const section = document.getElementById("specialJobSection");
+  
+  if(specialCategories.includes(category)){
+    section.style.display = "block";
+  } else {
+    section.style.display = "none";
+    document.getElementById("demoLabor").value = 0;
+  }
+}
+
+function calculate() {
+  const pricePerLoad = parseFloat(document.getElementById("price").value) || 0;
+  const loads = parseFloat(document.getElementById("loads").value) || 1;
+  const employees = parseFloat(document.getElementById("employees").value) || 0;
+  const hourlyRate = parseFloat(document.getElementById("hourlyRate").value) || 0;
+  const hours = parseFloat(document.getElementById("hours").value) || 0;
+  const fuel = parseFloat(document.getElementById("fuel").value) || 0;
+  const dump = parseFloat(document.getElementById("dump").value) || 0;
+  const lead = parseFloat(document.getElementById("lead").value) || 0;
+  const discount = parseFloat(document.getElementById("discount").value) || 0;
+
+  const stairsFee = parseFloat(document.getElementById("stairsFee").value) || 0;
+  const heavyFee = parseFloat(document.getElementById("heavyFee").value) || 0;
+  const otherFee = parseFloat(document.getElementById("otherFee").value) || 0;
+  const extraOptions = stairsFee + heavyFee + otherFee;
+
+  const demoLabor = parseFloat(document.getElementById("demoLabor")?.value) || 0;
+
+  const totalRevenue = (pricePerLoad * loads) + demoLabor + extraOptions - discount;
+  const labor = employees * hourlyRate * hours;
+  const totalCost = fuel*loads + dump*loads + labor + lead;
+  const profit = totalRevenue - totalCost;
+  const margin = totalRevenue ? (profit / totalRevenue * 100) : 0;
+
+  const outputDiv = document.getElementById("output");
+  outputDiv.innerHTML = `
+    <div class="result-grid">
+      <div class="col-left">
+        <div><strong>Fuel:</strong> $${(fuel*loads).toFixed(2)}</div>
+        <div><strong>Dump Fee:</strong> $${(dump*loads).toFixed(2)}</div>
+        <div><strong>Labor:</strong> $${labor.toFixed(2)}</div>
+        <div><strong>Lead Cost:</strong> $${lead.toFixed(2)}</div>
+      </div>
+      <div class="col-right">
+        <div><strong>Total Revenue:</strong> <span style="color:#155724;">$${totalRevenue.toFixed(2)}</span></div>
+        <div><strong>Profit:</strong> <span style="color:#155724;">$${profit.toFixed(2)}</span></div>
+        <div><strong>Profit Margin:</strong> <span style="color:#155724;">${margin.toFixed(1)}%</span></div>
+      </div>
+    </div>
+  `;
+
+  const bar = document.getElementById("marginBar");
+  const clampedWidth = Math.min(Math.max(margin,0),100);
+  bar.style.width = clampedWidth + "%";
+
+  if(margin >= 60){ bar.style.background = "green"; bar.style.color="#fff"; }
+  else if(margin >= 40){ bar.style.background = "yellow"; bar.style.color="#000"; }
+  else{ bar.style.background = "red"; bar.style.color="#fff"; }
+
+  bar.innerHTML = margin.toFixed(1) + "%";
+
+  document.getElementById("lowMarginSuggestion").style.display = margin < 45 ? "block" : "none";
+
+  checkSpecialJob();
+}
+</script>
+
+</body>
+</html>
